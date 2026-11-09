@@ -1,0 +1,31 @@
+services:
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db:/var/lib/mysql
+
+  app:
+    image: nextcloud:stable
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"   # localhost only; Tailscale Serve proxies in
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      - db
+    volumes:
+      - nextcloud:/var/www/html
+
+volumes:
+  db:
+  nextcloud:
